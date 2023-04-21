@@ -21,6 +21,20 @@ app.get("/*", function (req, res) {
   res.sendFile(path.join(__dirname, "build", "index.html"));
 });
 
-app.listen(port, function () {
+const server = app.listen(port, function () {
   console.log(`express app running on port ${port}`);
+});
+
+const io = require("./config/socket").init(server);
+
+io.on("connection", (socket) => {
+  console.log(`user id: ${socket.id} has connected`);
+
+  socket.on("disconnect", () => {
+    console.log(`user id: ${socket.id} has disconnected`);
+  });
+
+  socket.on("sendMsg", (msg) => {
+    socket.broadcast.emit("newMsg", msg);
+  });
 });
